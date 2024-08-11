@@ -33,7 +33,11 @@ The frontend is built using HTML, CSS, and React, and includes the following com
   - `styles/` - CSS files for styling.
   - `index.html` - Main HTML file.
   - `App.html` - Entry point for the frontend application.
+ 
+
 ![image](https://github.com/user-attachments/assets/a3513681-1f74-4538-846a-c94a59788c2f)
+![image](https://github.com/user-attachments/assets/e2848252-2928-4330-a60c-16c945477d3c)
+
 
 ### Backend
 
