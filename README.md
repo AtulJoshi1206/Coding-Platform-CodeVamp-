@@ -1,6 +1,7 @@
+
 Here's the updated `README.md` file summarizing the project's development and including the details about resources and challenges:
 
-```markdown
+markdown
 # CodeVamp
 
 **CodeVamp** is a full-stack online coding platform designed for the Tally competition. It features a coding editor, playground, and leaderboard, supporting multiple programming languages with a user-friendly interface, including light and dark modes.
