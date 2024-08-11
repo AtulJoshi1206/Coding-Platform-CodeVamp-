@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link id="theme-link" rel="stylesheet" href="src/styles/light.css">
+    <link rel="stylesheet" href="src/styles/leaderboard.css">
+    <script defer src="src/js/themeToggle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Leaderboard</h1>
+        <button id="theme-toggle">Toggle Dark/Light Mode</button>
+    </header>
+    <main>
+        <div class="container">
+            <div class="leaderboard">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Score</th>
+                            <th>Problems Solved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Leaderboard data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="sidebar">
+                <h2>Suggestions</h2>
+                <ul>
+                    <li>Learn more about Python basics.</li>
+                    <li>Understand data structures and algorithms.</li>
+                    <li>Explore advanced Python libraries.</li>
+                </ul>
+                <div class="rank-info">
+                    <h2>Rank & Total Marks</h2>
+                    <p>Rank: <span id="rank">1</span></p>
+                    <p>Total Marks: <span id="total-marks">100</span></p>
+                </div>
+                <div class="graph-container">
+                    <canvas id="performanceGraph"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="src/js/leaderboard.js"></script>
+    <script>
+        // Example data for the graph
+        const ctx = document.getElementById('performanceGraph').getContext('2d');
+        const performanceGraph = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'],
+                datasets: [{
+                    label: 'Performance',
+                    data: [10, 15, 20, 25, 30],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

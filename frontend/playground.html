@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeVamp</title>
+    <link rel="stylesheet" href="styles2.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="background"></div> <!-- Background image -->
+    
+    <h1>CodeVamp</h1>
+
+    <div class="theme-toggle">
+        <input type="checkbox" id="theme-toggle">
+        <label class="theme-label" for="theme-toggle">
+            <span class="sun">🌞</span>
+            <span class="moon">🌜</span>
+        </label>
+    </div>
+
+    <!-- Sidebar for Problems -->
+    <div class="sidebar">
+        <h2>Problems</h2>
+        <ul id="questionList">
+            <li onclick="selectQuestion('hello_world')">Hello World</li>
+            <li onclick="selectQuestion('palindrome')">Palindrome Checker</li>
+            <li onclick="selectQuestion('fibonacci')">Fibonacci Series</li>
+            <li onclick="selectQuestion('reverse')">Reverse String</li>
+            <li onclick="selectQuestion('sum_of_digits')">Sum of Digits</li>
+            <li onclick="selectQuestion('factorial')">Factorial</li>
+            <li onclick="selectQuestion('prime_number')">Prime Number</li>
+            <li onclick="selectQuestion('gcd')">GCD of Two Numbers</li>
+            <li onclick="selectQuestion('leap_year')">Leap Year Checker</li>
+            <li onclick="selectQuestion('armstrong')">Armstrong Number</li>
+        </ul>
+    </div>
+
+    <!-- Question Description -->
+    <div class="question-description">
+        <h2 id="questionTitle">Select a question from the left to start coding!</h2>
+        <p id="questionText">Here you'll see the description of the selected question.</p>
+    </div>
+
+    <!-- Editor and Output Container -->
+    <div class="editor-container">
+        <textarea id="codeSource" placeholder="Write your code here..."></textarea>
+        <button id="runCodeBtn" onclick="runCode()">Submit</button>
+        <div id="outputContainer" class="output-container">
+            <div id="output" class="output"></div>
+        </div>
+        <div id="scoreContainer" class="score-container">
+            <h3>Your Score: <span id="score">0</span></h3>
+        </div>
+    </div>
+    <script src="scripts/themeToggle.js"></script>
+    <script src="maiin.js"></script>
+</body>
+</html>
