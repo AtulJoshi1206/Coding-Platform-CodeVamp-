@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const redisConnection = new Redis({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD as string,
     maxRetriesPerRequest: null,
 });
 
@@ -181,8 +182,8 @@ const worker = new Worker(
         }
 
         // 5. Run each test case
-        for (let i = 0; i < testCases.length; i++) {
-            const testCase = testCases[i];
+        let testCaseIndex = 1;
+        for (const testCase of testCases) {
             const startTime = Date.now();
 
             try {
@@ -218,7 +219,7 @@ const worker = new Worker(
                     await runContainer.remove();
 
                     results.push({
-                        testCase: i + 1,
+                        testCase: testCaseIndex,
                         input: testCase.input,
                         expectedOutput: testCase.expectedOutput.trim(),
                         actualOutput: '',
@@ -226,6 +227,7 @@ const worker = new Worker(
                         error: 'Time Limit Exceeded',
                         time: EXECUTION_TIMEOUT_MS,
                     });
+                    testCaseIndex++;
                     continue;
                 }
 
@@ -240,7 +242,7 @@ const worker = new Worker(
                 const passed = actualOutput === expectedOutput;
 
                 results.push({
-                    testCase: i + 1,
+                    testCase: testCaseIndex,
                     input: testCase.input,
                     expectedOutput: expectedOutput,
                     actualOutput: actualOutput,
@@ -251,7 +253,7 @@ const worker = new Worker(
 
             } catch (runError: any) {
                 results.push({
-                    testCase: i + 1,
+                    testCase: testCaseIndex,
                     input: testCase.input,
                     expectedOutput: testCase.expectedOutput.trim(),
                     actualOutput: '',
@@ -260,6 +262,7 @@ const worker = new Worker(
                     time: Date.now() - startTime,
                 });
             }
+            testCaseIndex++;
         }
 
         // Cleanup
