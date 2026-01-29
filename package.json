@@ -11,6 +11,8 @@
         "build:api": "npm run build --prefix apps/api",
         "build:web": "npm run build --prefix apps/web",
         "build:worker": "npm run build --prefix apps/worker",
+        "start:api": "npm run start:prod --prefix apps/api",
+        "start:worker": "npm run start --prefix apps/worker",
         "install:all": "npm install && npm install --prefix apps/api && npm install --prefix apps/web && npm install --prefix apps/worker",
         "infra:up": "docker-compose up -d",
         "infra:down": "docker-compose down"
