@@ -39,7 +39,7 @@ Here is the recommended Production Architecture:
 4.  **Settings:**
     *   **Root Directory:** `apps/api`
 5.  **Variables:**
-    *   `MONGO_URI`: (Your MongoDB Atlas connection string)
+    *   `MONGODB_URI`: (Your MongoDB Atlas connection string)
     *   `REDIS_HOST`: (Your Redis Cloud/Upstash host)
     *   `REDIS_PORT`: (Your Redis port)
     *   `JWT_SECRET`: (A strong secret key)
