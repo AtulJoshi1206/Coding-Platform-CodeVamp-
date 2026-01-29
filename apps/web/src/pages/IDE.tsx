@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Sparkles, Clock, Zap } from 'lucide-react';
 
 import axios from 'axios';
+import { API_URL } from '../config';
 
 interface Problem {
     _id: string;
@@ -44,7 +45,7 @@ const IDE = () => {
     useEffect(() => {
         const fetchProblem = async () => {
             try {
-                const res = await axios.get(`http://localhost:3000/problems/${problemId}`);
+                const res = await axios.get(`${API_URL}/problems/${problemId}`);
                 setProblem(res.data);
                 if (res.data.boilerplates?.[language]) {
                     setCode(res.data.boilerplates[language]);
@@ -55,7 +56,7 @@ const IDE = () => {
         };
         const fetchAllProblems = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/problems');
+                const res = await axios.get(`${API_URL}/problems`);
                 setAllProblems(res.data);
             } catch (err) {
                 console.error('Failed to fetch problems', err);
@@ -78,7 +79,7 @@ const IDE = () => {
         setShowSuccessModal(false);
         try {
             const token = localStorage.getItem('token');
-            const submitRes = await axios.post('http://localhost:3000/submissions/execute', {
+            const submitRes = await axios.post(`${API_URL}/submissions/execute`, {
                 code,
                 language,
                 problemId,
@@ -90,7 +91,7 @@ const IDE = () => {
             const jobId = submitRes.data.jobId;
 
             const pollStatus = async () => {
-                const statusRes = await axios.get(`http://localhost:3000/submissions/status/${jobId}`);
+                const statusRes = await axios.get(`${API_URL}/submissions/status/${jobId}`);
                 if (statusRes.data.status === 'completed') {
                     setOutput(statusRes.data.result);
                     setIsRunning(false);

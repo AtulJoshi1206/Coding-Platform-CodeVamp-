@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, MapPin, Edit2, Check, X, Award, Coins, Flame, Trophy } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 const Profile = () => {
     const [user, setUser] = useState<any>(null);
@@ -13,7 +14,7 @@ const Profile = () => {
         const fetchUser = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:3000/users/me', {
+                const res = await axios.get(`${API_URL}/users/me`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUser(res.data);
@@ -30,7 +31,7 @@ const Profile = () => {
     const handleSave = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put('http://localhost:3000/users/profile', editData, {
+            const res = await axios.put(`${API_URL}/users/profile`, editData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(res.data);

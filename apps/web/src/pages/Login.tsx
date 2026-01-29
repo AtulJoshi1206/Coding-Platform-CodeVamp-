@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Terminal } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ const Login = () => {
         setIsLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:3000/auth/login', {
+            const res = await axios.post(`${API_URL}/auth/login`, {
                 email,
                 password
             });

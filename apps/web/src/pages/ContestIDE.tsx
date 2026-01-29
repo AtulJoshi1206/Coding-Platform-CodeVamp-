@@ -4,6 +4,7 @@ import Editor, { type OnChange } from '@monaco-editor/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Clock } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 interface ContestProblem {
     title: string;
@@ -40,8 +41,8 @@ const ContestIDE = () => {
         const fetchProblem = async () => {
             try {
                 const [problemRes, contestRes] = await Promise.all([
-                    axios.get(`http://localhost:3000/contests/${contestId}/problem/${problemIndex}`),
-                    axios.get(`http://localhost:3000/contests/${contestId}`),
+                    axios.get(`${API_URL}/contests/${contestId}/problem/${problemIndex}`),
+                    axios.get(`${API_URL}/contests/${contestId}`),
                 ]);
                 setProblem(problemRes.data);
                 setContestProblems(contestRes.data.problems);
@@ -76,7 +77,7 @@ const ContestIDE = () => {
                 ? problem.testCases
                 : problem.testCases.filter(tc => !tc.isHidden);
 
-            const submitRes = await axios.post('http://localhost:3000/submissions/execute', {
+            const submitRes = await axios.post(`${API_URL}/submissions/execute`, {
                 code,
                 language,
                 problemId: `contest_${contestId}_${problemIndex}`, // Special ID for contest problems
@@ -89,7 +90,7 @@ const ContestIDE = () => {
             const jobId = submitRes.data.jobId;
 
             const pollStatus = async () => {
-                const statusRes = await axios.get(`http://localhost:3000/submissions/status/${jobId}`);
+                const statusRes = await axios.get(`${API_URL}/submissions/status/${jobId}`);
                 if (statusRes.data.status === 'completed') {
                     setOutput(statusRes.data.result);
                     setIsRunning(false);
@@ -101,7 +102,7 @@ const ContestIDE = () => {
 
                         if (allPassed) {
                             // Record solve
-                            await axios.post(`http://localhost:3000/contests/${contestId}/solve/${problemIndex}`, {
+                            await axios.post(`${API_URL}/contests/${contestId}/solve/${problemIndex}`, {
                                 time: totalTime
                             }, {
                                 headers: { Authorization: `Bearer ${token}` }
@@ -217,8 +218,8 @@ const ContestIDE = () => {
                     <h2 className="font-semibold">{problem.title}</h2>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded border ${problem.difficulty === 'Easy' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                        problem.difficulty === 'Medium' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                            'bg-red-500/10 text-red-400 border-red-500/20'
+                    problem.difficulty === 'Medium' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+                        'bg-red-500/10 text-red-400 border-red-500/20'
                     }`}>
                     {problem.difficulty}
                 </span>
@@ -231,8 +232,8 @@ const ContestIDE = () => {
                             key={i}
                             onClick={() => navigate(`/contests/${contestId}/problem/${i}`)}
                             className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${parseInt(problemIndex || '0') === i
-                                    ? 'bg-primary text-black'
-                                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                                ? 'bg-primary text-black'
+                                : 'bg-white/5 hover:bg-white/10 text-gray-400'
                                 }`}
                         >
                             {String.fromCharCode(65 + i)}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, ChevronLeft, Save, Calendar, Clock, Trophy } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 interface TestCase {
     input: string;
@@ -106,7 +107,7 @@ public class Main {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:3000/contests', {
+            await axios.post(`${API_URL}/contests`, {
                 title,
                 description,
                 startTime: new Date(startTime).toISOString(),

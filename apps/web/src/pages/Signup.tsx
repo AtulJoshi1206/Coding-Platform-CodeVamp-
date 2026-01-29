@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Terminal } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 const Signup = () => {
     const [username, setUsername] = useState('');
@@ -17,7 +18,7 @@ const Signup = () => {
         setIsLoading(true);
         setError('');
         try {
-            const res = await axios.post('http://localhost:3000/auth/register', {
+            const res = await axios.post(`${API_URL}/auth/register`, {
                 username,
                 email,
                 password

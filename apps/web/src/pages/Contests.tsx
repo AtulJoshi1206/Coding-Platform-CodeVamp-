@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trophy, Calendar, Clock, Users, Plus, ChevronRight, Zap } from 'lucide-react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 interface Contest {
     _id: string;
@@ -27,9 +28,9 @@ const Contests = () => {
         const fetchContests = async () => {
             try {
                 const [allRes, activeRes, upcomingRes] = await Promise.all([
-                    axios.get('http://localhost:3000/contests'),
-                    axios.get('http://localhost:3000/contests/active'),
-                    axios.get('http://localhost:3000/contests/upcoming'),
+                    axios.get(`${API_URL}/contests`),
+                    axios.get(`${API_URL}/contests/active`),
+                    axios.get(`${API_URL}/contests/upcoming`),
                 ]);
                 setContests(allRes.data);
                 setActiveContests(activeRes.data);

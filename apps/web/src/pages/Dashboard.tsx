@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy, Flame, Search } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { API_URL } from '../config';
 
 interface Problem {
     _id: string;
@@ -29,7 +30,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchProblems = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/problems');
+                const res = await axios.get(`${API_URL}/problems`);
                 setProblems(res.data);
             } catch (err) {
                 console.error('Failed to fetch problems', err);
@@ -38,7 +39,7 @@ const Dashboard = () => {
 
         const fetchLeaderboard = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/leaderboard');
+                const res = await axios.get(`${API_URL}/leaderboard`);
                 setTopUsers(res.data);
             } catch (err) {
                 console.error('Failed to fetch leaderboard', err);
@@ -47,7 +48,7 @@ const Dashboard = () => {
 
         const fetchPOTD = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/potd');
+                const res = await axios.get(`${API_URL}/potd`);
                 setPotd(res.data);
             } catch (err) {
                 console.error('Failed to fetch POTD', err);
@@ -58,7 +59,7 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const res = await axios.get('http://localhost:3000/users/me', {
+                    const res = await axios.get(`${API_URL}/users/me`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setUser(res.data);
@@ -73,7 +74,7 @@ const Dashboard = () => {
         fetchPOTD();
         fetchUser();
 
-        const socket = io('http://localhost:3000');
+        const socket = io(API_URL);
         socket.on('leaderboardUpdate', (data: TopUser[]) => {
             setTopUsers(data);
         });

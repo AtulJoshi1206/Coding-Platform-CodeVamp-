@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 import { motion } from 'framer-motion';
 import { Trophy, Calendar, Clock, Users, ChevronLeft, Play, Award } from 'lucide-react';
 import axios from 'axios';
@@ -35,8 +36,8 @@ const ContestDetail = () => {
         const fetchContest = async () => {
             try {
                 const [contestRes, leaderboardRes] = await Promise.all([
-                    axios.get(`http://localhost:3000/contests/${contestId}`),
-                    axios.get(`http://localhost:3000/contests/${contestId}/leaderboard`),
+                    axios.get(`${API_URL}/contests/${contestId}`),
+                    axios.get(`${API_URL}/contests/${contestId}/leaderboard`),
                 ]);
                 setContest(contestRes.data);
                 setLeaderboard(leaderboardRes.data);
@@ -60,7 +61,7 @@ const ContestDetail = () => {
         setJoining(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3000/contests/${contestId}/join`, {}, {
+            await axios.post(`${API_URL}/contests/${contestId}/join`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setHasJoined(true);
