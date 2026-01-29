@@ -987,8 +987,19 @@ int main() {
             },
         ];
 
-        await this.problemModel.deleteMany({});
-        await this.problemModel.insertMany(problems);
-        console.log(`✅ Seeded ${problems.length} problems (Program-Based Execution Model)`);
+        let seededCount = 0;
+        for (const problem of problems) {
+            try {
+                await this.problemModel.updateOne(
+                    { title: problem.title },
+                    { $set: problem },
+                    { upsert: true }
+                );
+                seededCount++;
+            } catch (err) {
+                console.error(`Failed to seed problem: ${problem.title}`, err);
+            }
+        }
+        console.log(`✅ Synchronized ${seededCount} problems with database`);
     }
 }

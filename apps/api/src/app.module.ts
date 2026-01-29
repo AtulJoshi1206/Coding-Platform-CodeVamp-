@@ -29,7 +29,8 @@ import { POTDModule } from './potd/potd.module';
       useFactory: async (configService: ConfigService) => ({
         connection: {
           host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
+          port: parseInt(configService.get<string>('REDIS_PORT', '6379'), 10),
+          password: configService.get<string>('REDIS_PASSWORD'),
         },
       }),
       inject: [ConfigService],
