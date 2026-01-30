@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Terminal, User as UserIcon, LogOut } from 'lucide-react';
+import { User as UserIcon, LogOut } from 'lucide-react';
+
 import { useEffect, useState } from 'react';
 
 const Navbar = () => {
@@ -36,9 +37,11 @@ const Navbar = () => {
     return (
         <nav className="border-b border-border bg-surface/50 backdrop-blur-md sticky top-0 z-50">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <Link to="/" className="flex items-center gap-2 text-primary font-bold text-xl">
-                    <Terminal size={24} />
-                    <span>CodeVamp <span className="text-gray-500 font-light text-sm">PRO</span></span>
+                <Link to="/" className="flex items-center gap-3 text-primary font-bold text-xl group">
+                    <div className="w-9 h-9 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-all overflow-hidden border border-primary/20">
+                        <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="tracking-tight">CodeVamp <span className="text-gray-500 font-light text-sm uppercase tracking-widest ml-1">Pro</span></span>
                 </Link>
 
                 <div className="flex items-center gap-6 text-sm font-medium text-gray-400">
