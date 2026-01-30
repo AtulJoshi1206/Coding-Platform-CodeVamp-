@@ -5,16 +5,16 @@
         "apps/*"
     ],
     "scripts": {
-        "dev:api": "npm run start:dev --workspace=api",
-        "dev:web": "npm run dev --workspace=web",
-        "build:api": "npx nest build --path apps/api/tsconfig.json",
-        "build:web": "npm run build --workspace=web",
-        "start:api": "npm run start:prod --workspace=api",
+        "dev:api": "npm run start:dev -w api",
+        "dev:web": "npm run dev -w web",
+        "build:api": "npm run build -w api",
+        "build:web": "npm run build -w web",
+        "start:api": "npm run start:prod -w api",
         "install:all": "npm install",
         "infra:up": "docker-compose up -d",
         "infra:down": "docker-compose down"
     },
-    "devDependencies": {
+    "dependencies": {
         "@nestjs/cli": "^11.0.16",
         "typescript": "^5.9.3"
     }

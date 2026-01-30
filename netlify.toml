@@ -1,7 +1,8 @@
 [build]
-  command = "npm install && npm run build:api && npm run build:web"
+  command = "npm install --include=dev && npm run build:api && npm run build:web"
   publish = "apps/web/dist"
   functions = "apps/api/dist"
+
 
 
 [build.environment]
