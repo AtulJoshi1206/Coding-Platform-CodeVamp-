@@ -1,9 +1,10 @@
 [build]
-  command = "npm install --include=dev && npm run build:api && npm run build:web"
+  command = "npm install --include=dev && npm run build:api && npm run build:web && mkdir -p apps/api/netlify-deploy && cp apps/api/netlify-function.js apps/api/netlify-deploy/api.js"
   publish = "apps/web/dist"
-  functions = "apps/api/dist"
+  functions = "apps/api/netlify-deploy"
 
-
+[functions]
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -12,7 +13,7 @@
 # Proxy API requests to our Netlify Function (NestJS)
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/lambda/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 # Handle SPA Routing
