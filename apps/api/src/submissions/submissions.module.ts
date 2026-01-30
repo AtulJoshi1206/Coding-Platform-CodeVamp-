@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bullmq';
+import { MongooseModule } from '@nestjs/mongoose';
 import { SubmissionsController } from './submissions.controller';
 import { SubmissionsService } from './submissions.service';
+import { ExecutionService } from './execution.service';
+import { Submission, SubmissionSchema } from './schemas/submission.schema';
 import { ProblemsModule } from '../problems/problems.module';
 import { UsersModule } from '../users/users.module';
 import { LeaderboardModule } from '../leaderboard/leaderboard.module';
@@ -10,9 +12,7 @@ import { ContestsModule } from '../contests/contests.module';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'code-execution',
-    }),
+    MongooseModule.forFeature([{ name: Submission.name, schema: SubmissionSchema }]),
     ProblemsModule,
     UsersModule,
     LeaderboardModule,
@@ -20,6 +20,7 @@ import { ContestsModule } from '../contests/contests.module';
     ContestsModule,
   ],
   controllers: [SubmissionsController],
-  providers: [SubmissionsService],
+  providers: [SubmissionsService, ExecutionService],
 })
 export class SubmissionsModule { }
+

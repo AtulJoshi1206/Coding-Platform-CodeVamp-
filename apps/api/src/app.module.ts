@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProblemsModule } from './problems/problems.module';
@@ -25,17 +25,6 @@ import { POTDModule } from './potd/potd.module';
       }),
       inject: [ConfigService],
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: parseInt(configService.get<string>('REDIS_PORT', '6379'), 10),
-          password: configService.get<string>('REDIS_PASSWORD'),
-        },
-      }),
-      inject: [ConfigService],
-    }),
     ProblemsModule,
     SubmissionsModule,
     AuthModule,
@@ -48,3 +37,4 @@ import { POTDModule } from './potd/potd.module';
   providers: [AppService],
 })
 export class AppModule { }
+

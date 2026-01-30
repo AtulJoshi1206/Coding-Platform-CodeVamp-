@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build:api && npm run build:web"
+  publish = "apps/web/dist"
+  functions = "apps/api/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NODE_ENV = "production"
+
+# Proxy API requests to our Netlify Function (NestJS)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/lambda/:splat"
+  status = 200
+
+# Handle SPA Routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+
