@@ -18,7 +18,8 @@ export class UsersService {
     }
 
     async findById(id: string): Promise<UserDocument | null> {
-        return this.userModel.findById(id).exec();
+        // Never return the hashed password to callers
+        return this.userModel.findById(id).select('-password').exec();
     }
 
     async getTopUsers(limit: number = 10): Promise<UserDocument[]> {
@@ -53,8 +54,26 @@ export class UsersService {
         );
     }
 
-    async updateProfile(userId: string, profileData: Partial<User>) {
-        return this.userModel.findByIdAndUpdate(userId, { $set: profileData }, { new: true });
+    async updateProfile(userId: string, profileData: any) {
+        // ── Security: Whitelist-only update — prevent mass assignment ────────
+        // Users MUST NOT be able to set: password, score, role, solvedProblems, etc.
+        const allowedFields = ['bio', 'location', 'githubUrl', 'linkedInUrl', 'twitterUrl'];
+        const safeUpdate: Record<string, any> = {};
+        for (const key of allowedFields) {
+            if (profileData[key] !== undefined) {
+                safeUpdate[key] = String(profileData[key]).slice(0, 500);
+            }
+        }
+        
+        // Handle skills array updates safely
+        if (Array.isArray(profileData.skills)) {
+            safeUpdate.skills = profileData.skills
+                .map(s => String(s).slice(0, 50))
+                .filter(Boolean)
+                .slice(0, 20); // Max 20 skills
+        }
+
+        return this.userModel.findByIdAndUpdate(userId, { $set: safeUpdate }, { new: true }).select('-password');
     }
 
     async awardCoins(userId: string, amount: number) {

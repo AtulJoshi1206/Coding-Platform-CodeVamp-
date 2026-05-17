@@ -47,6 +47,12 @@ export class User {
     @Prop({ default: '' })
     linkedInUrl: string;
 
+    @Prop({ default: '' })
+    twitterUrl: string;
+
+    @Prop({ type: [String], default: [] })
+    skills: string[];
+
     @Prop({ type: [String], default: [] })
     solvedProblems: string[]; // Array of problem IDs
 

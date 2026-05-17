@@ -58,7 +58,23 @@ export class ExecutionService {
         return { results };
     }
 
+    // ── Security: Strict language whitelist ──────────────────────────────────
+    private static readonly ALLOWED_LANGUAGES = new Set(['python', 'cpp', 'javascript', 'java', 'go']);
+
     private async runLocal(code: string, language: string, input: string, jobId: string) {
+        // ── Security: Validate language (prevent unsupported/malicious values) ─
+        if (!ExecutionService.ALLOWED_LANGUAGES.has(language)) {
+            throw new Error(`Unsupported language: ${language}`);
+        }
+        // ── Security: Validate jobId is a safe UUID (prevent path traversal) ──
+        if (!/^[a-f0-9-]+$/.test(jobId)) {
+            throw new Error('Invalid jobId format');
+        }
+        // ── Security: Validate code size (prevent huge payloads) ───────────────
+        if (code.length > 64 * 1024) { // 64 KB max
+            throw new Error('Code size exceeds 64KB limit');
+        }
+
         const start = Date.now();
         let stdout = '';
         let stderr = '';
