@@ -14,8 +14,13 @@ export class POTDService implements OnModuleInit {
     ) { }
 
     async onModuleInit() {
-        // Ensure there's a POTD for today
-        await this.getOrCreateTodaysPOTD();
+        // Gracefully initialize POTD — don't crash if DB is empty on first boot
+        // (Problems are seeded async, so this may run before seed completes)
+        try {
+            await this.getOrCreateTodaysPOTD();
+        } catch (err) {
+            console.warn('[POTD] Skipping POTD init on startup — no problems in DB yet. Will retry on first request.');
+        }
     }
 
     private getTodayDate(): string {

@@ -63,6 +63,7 @@ export class SubmissionsService {
         await submission.save();
 
         // Start execution asynchronously
+        console.log(`Submitting code for problem ${problemId} (user: ${userId})`);
         this.runExecution(submission.id as string, code, language, testCases, userId, problemId, isSubmit);
 
 
@@ -86,6 +87,7 @@ export class SubmissionsService {
                 }
             }
         } catch (error) {
+            console.error(`Execution failed for submission ${submissionId}:`, error);
             await this.submissionModel.findByIdAndUpdate(submissionId, {
                 status: 'failed',
                 result: { error: error.message },

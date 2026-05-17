@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Editor, { type OnChange } from '@monaco-editor/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Clock } from 'lucide-react';
+import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Clock, LogIn, Lock } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../config';
 
@@ -30,6 +30,7 @@ const ContestIDE = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [problem, setProblem] = useState<ContestProblem | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const [executionTime, setExecutionTime] = useState(0);
     const [contestProblems, setContestProblems] = useState<any[]>([]);
 
@@ -65,13 +66,18 @@ const ContestIDE = () => {
     const runCode = async (isSubmit: boolean = false) => {
         if (!problem) return;
 
+        // Auth gate: require login before any execution
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setShowLoginModal(true);
+            return;
+        }
+
         setIsRunning(true);
         setOutput(null);
         setShowSuccessModal(false);
 
         try {
-            const token = localStorage.getItem('token');
-
             // Use public test cases for run, all for submit
             const testCases = isSubmit
                 ? problem.testCases
@@ -146,6 +152,81 @@ const ContestIDE = () => {
 
     return (
         <div className="flex flex-col h-[calc(100vh-8rem)]">
+            {/* Login Required Modal */}
+            <AnimatePresence>
+                {showLoginModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center"
+                        onClick={() => setShowLoginModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.85, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.85, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+                            className="bg-gradient-to-br from-surface to-background border border-primary/30 rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl shadow-primary/20"
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        >
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.15, type: 'spring', stiffness: 200 }}
+                                className="w-16 h-16 bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/40 rounded-2xl flex items-center justify-center mx-auto mb-5"
+                            >
+                                <Lock className="text-primary" size={28} />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <h2 className="text-2xl font-bold text-white mb-2">Login Required</h2>
+                                <p className="text-gray-400 text-sm mb-6">
+                                    You need to be logged in to run or submit code in this contest.
+                                </p>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="flex gap-3"
+                            >
+                                <button
+                                    onClick={() => setShowLoginModal(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white px-4 py-2.5 rounded-xl font-medium transition-all border border-border text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <Link
+                                    to="/login"
+                                    className="flex-1 bg-gradient-to-r from-primary to-primary/80 text-black px-4 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 hover:opacity-90 text-sm"
+                                >
+                                    <LogIn size={16} />
+                                    Login Now
+                                </Link>
+                            </motion.div>
+
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-gray-600 text-xs mt-4"
+                            >
+                                No account?{' '}
+                                <Link to="/signup" className="text-primary hover:underline" onClick={() => setShowLoginModal(false)}>
+                                    Sign up free
+                                </Link>
+                            </motion.p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Success Modal */}
             <AnimatePresence>
                 {showSuccessModal && (
