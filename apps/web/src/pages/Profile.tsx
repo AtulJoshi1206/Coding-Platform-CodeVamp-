@@ -471,7 +471,9 @@ const Profile = () => {
                                     <div>
                                         <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Contest Rating</p>
                                         <h4 className="text-3xl font-black text-[#FFB020] mt-0.5">
-                                            {userScore > 0 ? (1400 + Math.floor(userScore * 1.5)).toLocaleString() : '1,500'}
+                                            {(user?.contestsJoined?.length || 0) > 0 
+                                                ? (1500 + Math.floor(userScore * 1.5)).toLocaleString() 
+                                                : '0'}
                                         </h4>
                                     </div>
                                     <div className="text-right">
@@ -481,12 +483,15 @@ const Profile = () => {
                                         </p>
                                     </div>
                                 </div>
-
+ 
                                 {/* Custom Rating Sparkline Representation */}
                                 <div className="h-20 w-full bg-[#161B26] border border-[#2E364F]/40 rounded-xl relative overflow-hidden flex items-end">
                                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
                                         <path 
-                                            d={`M0 25 C 20 ${userScore > 20 ? 15 : 22}, 40 ${userScore > 50 ? 8 : 18}, 70 ${userScore > 100 ? 4 : 12}, 100 ${userScore > 200 ? 2 : 10}`} 
+                                            d={(user?.contestsJoined?.length || 0) > 0 
+                                                ? `M0 25 C 20 ${userScore > 20 ? 15 : 22}, 40 ${userScore > 50 ? 8 : 18}, 70 ${userScore > 100 ? 4 : 12}, 100 ${userScore > 200 ? 2 : 10}` 
+                                                : `M0 25 L 100 25`
+                                            } 
                                             fill="none" 
                                             stroke="url(#sparkline-grad)" 
                                             strokeWidth="2.5"
@@ -507,21 +512,23 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </div>
-
+ 
                             {/* Card 2: Rating Distribution */}
                             <div className="p-6 flex flex-col justify-between">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <p className="text-xs font-bold text-gray-400">Rating Distribution</p>
                                         <span className="text-xs text-primary font-black bg-primary/10 px-2 py-0.5 rounded">
-                                            Top {userScore > 200 ? '0.84%' : userScore > 100 ? '1.53%' : '8.4%'}
+                                            {(user?.contestsJoined?.length || 0) > 0 
+                                                ? `Top ${userScore > 200 ? '0.84%' : userScore > 100 ? '1.53%' : '8.4%'}` 
+                                                : 'Unrated'}
                                         </span>
                                     </div>
                                     
                                     {/* Simulated bell curve rating graph */}
                                     <div className="flex items-end justify-between gap-1.5 h-16 pt-2">
                                         {[20, 35, 55, 85, 95, 75, 45, 25, 10].map((val, idx) => {
-                                            const isHighlight = idx === (userScore > 150 ? 5 : userScore > 50 ? 4 : 3);
+                                            const isHighlight = (user?.contestsJoined?.length || 0) > 0 && idx === (userScore > 150 ? 5 : userScore > 50 ? 4 : 3);
                                             return (
                                                 <div 
                                                     key={idx} 
