@@ -35,10 +35,13 @@ export class ExecutionService {
         const jobId = randomUUID();
         const workDir = path.join(this.TEMP_DIR, jobId);
         await fs.mkdir(workDir, { recursive: true });
-
-        // Resource limit prefix: 10s CPU time, 256MB virtual memory
-        const ulimitPrefix = `ulimit -t 10 -v 262144 2>/dev/null; `;
-
+ 
+        // ── Security: Configure dynamic ulimit tailored to language runtime memory footprints ──
+        // Java JVM requires a larger virtual memory address space mapping (1GB) to initialize successfully.
+        const langUlimit = language === 'java' 
+            ? 'ulimit -t 10 -v 1048576 2>/dev/null; ' 
+            : 'ulimit -t 10 -v 262144 2>/dev/null; ';
+ 
         try {
             // ── Step 1: Write code and compile ONCE if needed ───────
             let binPath = '';
@@ -57,7 +60,7 @@ export class ExecutionService {
                 const sourcePath = path.join(workDir, 'solution.cpp');
                 binPath = path.join(workDir, 'solution');
                 await fs.writeFile(sourcePath, code, 'utf8');
-
+ 
                 // Compile ONCE before running test cases
                 await execAsync(
                     `g++ -O2 -std=c++17 "${sourcePath}" -o "${binPath}"`,
@@ -68,7 +71,7 @@ export class ExecutionService {
                 const filePath = path.join(workDir, 'Solution.java');
                 const javaCode = code.replace(/public\s+class\s+\w+/g, 'public class Solution');
                 await fs.writeFile(filePath, javaCode, 'utf8');
-
+ 
                 // Compile ONCE before running test cases
                 await execAsync(`javac "${filePath}"`, { timeout: 20000, cwd: workDir })
                     .catch(err => { throw new Error(`Compilation Error: ${err.stderr || err.message}`); });
@@ -77,37 +80,38 @@ export class ExecutionService {
                 const filePath = path.join(workDir, 'solution.go');
                 binPath = path.join(workDir, 'solution');
                 await fs.writeFile(filePath, code, 'utf8');
-
+ 
                 // Compile ONCE before running test cases
                 await execAsync(`go build -o "${binPath}" "${filePath}"`, { timeout: 20000 })
                     .catch(err => { throw new Error(`Build Error: ${err.stderr || err.message}`); });
             }
-
+ 
             // ── Step 2: Run all test cases in PARALLEL using the pre-compiled binary ──
             const results = await Promise.all(
                 testCases.map(async (testCase, index) => {
                     const start = Date.now();
                     const stdinPath = path.join(workDir, `stdin-${index}.txt`);
                     await fs.writeFile(stdinPath, testCase.input, 'utf8');
-
+ 
                     let stdout = '';
                     let stderr = '';
                     let cmd = '';
-
+ 
                     if (language === 'python') {
-                        cmd = `${ulimitPrefix}python3 "${binPath}" < "${stdinPath}"`;
+                        cmd = `${langUlimit}python3 "${binPath}" < "${stdinPath}"`;
                     }
                     else if (language === 'javascript') {
-                        cmd = `${ulimitPrefix}node "${binPath}" < "${stdinPath}"`;
+                        cmd = `${langUlimit}node "${binPath}" < "${stdinPath}"`;
                     }
                     else if (language === 'cpp') {
-                        cmd = `${ulimitPrefix}"${binPath}" < "${stdinPath}"`;
+                        cmd = `${langUlimit}"${binPath}" < "${stdinPath}"`;
                     }
                     else if (language === 'go') {
-                        cmd = `${ulimitPrefix}"${binPath}" < "${stdinPath}"`;
+                        cmd = `${langUlimit}"${binPath}" < "${stdinPath}"`;
                     }
                     else if (language === 'java') {
-                        cmd = `${ulimitPrefix}java -cp "${workDir}" Solution < "${stdinPath}"`;
+                        // -Xmx128m -Xms32m limits physical heap allocations and prevents out-of-memory leaks
+                        cmd = `${langUlimit}java -Xmx128m -Xms32m -XX:MaxMetaspaceSize=64m -cp "${workDir}" Solution < "${stdinPath}"`;
                     }
 
                     try {
