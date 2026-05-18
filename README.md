@@ -85,6 +85,20 @@ To safely run untrusted code on our containerized backend without compromising h
 5. **Immediate Disk Cleanup**:
    * Inside a `finally` block, the dynamic UUID folder and all compile artifacts are completely deleted, ensuring zero resource leakage.
 
+### ⚙️ Multi-Language Compilation & Execution Pipelines
+The platform dynamically maps each language submission to its exact native system commands to guarantee high execution throughput:
+
+| Language | Code File Name | Compilation Command | Sandboxed Execution Command |
+| :--- | :--- | :--- | :--- |
+| **C++ (g++)** | `solution.cpp` | `g++ -O2 -std=c++17 "solution.cpp" -o "solution"` | `ulimit -t 10 -v 262144; "./solution" < "stdin.txt"` |
+| **Python 3** | `solution.py` | *(None - Interpreted)* | `ulimit -t 10 -v 262144; python3 "solution.py" < "stdin.txt"` |
+| **Java (JDK)** | `Solution.java` | `javac "Solution.java"` | `ulimit -t 10 -v 262144; java -cp . Solution < "stdin.txt"` |
+| **JavaScript** | `solution.js` | *(None - Interpreted)* | `ulimit -t 10 -v 262144; node "solution.js" < "stdin.txt"` |
+| **Go** | `solution.go` | `go build -o "solution" "solution.go"` | `ulimit -t 10 -v 262144; "./solution" < "stdin.txt"` |
+
+> [!NOTE]
+> **Java Class Matcher Safety**: If a user submits a public class with a custom name (e.g. `public class Main`), CodeVamp's backend dynamically rewrites it (`code.replace(/public\s+class\s+\w+/g, 'public class Solution')`) before writing to disk, ensuring JDK compilation never throws file-class mismatch exceptions.
+
 ---
 
 ## 📊 Dynamic Database-Driven Profile Statistics
