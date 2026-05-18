@@ -22,6 +22,15 @@ export class UsersService {
         return this.userModel.findById(id).select('-password').exec();
     }
 
+    async getUserRank(score: number): Promise<number> {
+        const count = await this.userModel.countDocuments({ score: { $gt: score } }).exec();
+        return count + 1;
+    }
+
+    async getTotalUsers(): Promise<number> {
+        return this.userModel.countDocuments().exec();
+    }
+
     async getTopUsers(limit: number = 10): Promise<UserDocument[]> {
         return this.userModel
             .find({}, { password: 0 })

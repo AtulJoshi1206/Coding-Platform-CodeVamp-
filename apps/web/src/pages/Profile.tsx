@@ -24,6 +24,7 @@ import { API_URL } from '../config';
 
 const Profile = () => {
     const [user, setUser] = useState<any>(null);
+    const [submissions, setSubmissions] = useState<any[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<any>({});
     const [loading, setLoading] = useState(true);
@@ -32,24 +33,37 @@ const Profile = () => {
     const [selectedHeatmapCell, setSelectedHeatmapCell] = useState<any>(null);
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchUserData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`${API_URL}/users/me`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUser(res.data);
+                if (!token) {
+                    setLoading(false);
+                    return;
+                }
+                const [userRes, submissionsRes] = await Promise.all([
+                    axios.get(`${API_URL}/users/me`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    axios.get(`${API_URL}/submissions/history`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }).catch(err => {
+                        console.error('Failed to fetch submissions history', err);
+                        return { data: [] };
+                    })
+                ]);
+                setUser(userRes.data);
                 setEditData({
-                    ...res.data,
-                    skills: res.data.skills || [],
+                    ...userRes.data,
+                    skills: userRes.data.skills || [],
                 });
+                setSubmissions(submissionsRes.data || []);
                 setLoading(false);
             } catch (err) {
-                console.error('Failed to fetch user', err);
+                console.error('Failed to fetch profile data', err);
                 setLoading(false);
             }
         };
-        fetchUser();
+        fetchUserData();
     }, []);
 
     const handleSave = async () => {
@@ -81,7 +95,7 @@ const Profile = () => {
 
     // Calculate dynamic ranks and statistics
     const userScore = user?.score || 0;
-    const globalRank = Math.max(1, 125304 - Math.floor(userScore * 12.5));
+    const globalRank = user?.rank || 1;
     const easyCount = user?.solvedEasy || 0;
     const mediumCount = user?.solvedMedium || 0;
     const hardCount = user?.solvedHard || 0;
@@ -110,27 +124,28 @@ const Profile = () => {
         const data = [];
         const days = 365;
         const now = new Date();
+
+        // Group submissions by local date string
+        const submissionsMap: Record<string, number> = {};
+        submissions.forEach((sub: any) => {
+            if (sub.createdAt) {
+                const d = new Date(sub.createdAt);
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                submissionsMap[dateStr] = (submissionsMap[dateStr] || 0) + 1;
+            }
+        });
         
-        // Let's seed deterministic random values based on solvedCount & user properties
         for (let i = days - 1; i >= 0; i--) {
             const date = new Date(now);
             date.setDate(now.getDate() - i);
-            const dateString = date.toISOString().split('T')[0];
             
-            // Random-ish but deterministic active status
+            const year = date.getFullYear();
+            const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+            const dayNum = String(date.getDate()).padStart(2, '0');
+            const dateString = `${year}-${monthNum}-${dayNum}`;
+            
             const dayOfWeek = date.getDay();
-            let count = 0;
-            const hash = (date.getMonth() * 31 + date.getDate() + (dayOfWeek * 7)) % 100;
-            
-            if (totalSolved > 0) {
-                if (hash < (totalSolved * 4 + 5)) {
-                    count = (hash % 4) + 1;
-                }
-            } else {
-                if (hash < 12) {
-                    count = 1;
-                }
-            }
+            const count = submissionsMap[dateString] || 0;
             
             data.push({
                 date: dateString,
@@ -394,11 +409,11 @@ const Profile = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-[#161B26] p-3 rounded-xl border border-[#2E364F]/40 flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400">
-                                    <Eye size={16} />
+                                    <Trophy size={16} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500 font-bold uppercase">Profile Views</p>
-                                    <p className="text-lg font-black text-white">{Math.floor(userScore * 1.5) + 12}</p>
+                                    <p className="text-xs text-gray-500 font-bold uppercase">Contests</p>
+                                    <p className="text-lg font-black text-white">{user?.contestsJoined?.length || 0}</p>
                                 </div>
                             </div>
                             <div className="bg-[#161B26] p-3 rounded-xl border border-[#2E364F]/40 flex items-center gap-3">
@@ -462,7 +477,7 @@ const Profile = () => {
                                     <div className="text-right">
                                         <p className="text-[10px] text-gray-500 uppercase font-semibold">Global Ranking</p>
                                         <p className="text-xs font-bold text-gray-300 mt-0.5">
-                                            {userScore > 0 ? `${(globalRank + 2500).toLocaleString()} / 874,349` : '—'}
+                                            {globalRank.toLocaleString()} / {(user?.totalUsers || 1).toLocaleString()}
                                         </p>
                                     </div>
                                 </div>

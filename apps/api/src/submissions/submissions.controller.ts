@@ -22,4 +22,10 @@ export class SubmissionsController {
     async getStatus(@Param('jobId') jobId: string) {
         return this.submissionsService.getJobStatus(jobId);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('history')
+    async getHistory(@Req() req: any) {
+        return this.submissionsService.findByUser(req.user.userId);
+    }
 }

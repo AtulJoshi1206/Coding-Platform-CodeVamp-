@@ -151,5 +151,9 @@ export class SubmissionsService {
             result: submission.result,
         };
     }
+
+    async findByUser(userId: string) {
+        return this.submissionModel.find({ userId }).sort({ createdAt: 1 }).exec();
+    }
 }
 

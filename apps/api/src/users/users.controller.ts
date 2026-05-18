@@ -9,7 +9,15 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getMe(@Req() req: any) {
-        return this.usersService.findById(req.user.userId);
+        const user = await this.usersService.findById(req.user.userId);
+        if (!user) return null;
+        const rank = await this.usersService.getUserRank(user.score);
+        const totalUsers = await this.usersService.getTotalUsers();
+        return {
+            ...user.toObject(),
+            rank,
+            totalUsers,
+        };
     }
 
     @UseGuards(JwtAuthGuard)
