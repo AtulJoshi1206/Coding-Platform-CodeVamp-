@@ -1,25 +1,20 @@
 [build]
-  command = "npm install --include=dev && npm run build:api && npm run build:web && mkdir -p apps/api/netlify-deploy && cp apps/api/netlify-function.js apps/api/netlify-deploy/api.js"
+  command = "npm install --include=dev && npm run build:web"
   publish = "apps/web/dist"
-  functions = "apps/api/netlify-deploy"
-
-[functions]
-  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
   NODE_ENV = "production"
 
-# Proxy API requests to our Netlify Function (NestJS)
+# Proxy API requests directly to Render backend (prevents CORS issues)
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "https://codevamp-backend.onrender.com/:splat"
   status = 200
+  force = true
 
-# Handle SPA Routing
+# Handle React Router / SPA Routing redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-
