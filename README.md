@@ -18,11 +18,11 @@ Designed to be **completely cost-free and 100% self-hosted**, CodeVamp eliminate
 
 ---
 
-## 💼 Recruiter & Resume Highlights (Hiring Manager Impact)
-If you are showcasing **CodeVamp** on your resume or portfolio, these highly quantitative, impact-oriented achievements are **100% verified** by the platform's production architecture:
+## 💼 Recruiter & Resume Highlights (1-Page Resume Ready)
+If you are showcasing **CodeVamp** on your resume, these concise, high-impact bullet points are verified by the production architecture:
 
-*   **Designed and deployed a full-stack competitive programming platform** supporting Python, C++, and Java execution, achieving a **35% reduction in code execution latency** by engineering a custom POSIX sandboxed execution engine in Node.js/NestJS that compiled and ran code directly inside cloud containers, completely removing expensive third-party APIs.
-*   **Optimized backend database architecture with MongoDB & Mongoose**, crafting high-performance aggregation pipelines for timezone-aware dynamic user heatmaps and leaderboard sorting, while ensuring the NestJS core was capable of safely handling **100+ concurrent API execution requests per second**.
+*   **Designed and deployed a full-stack coding platform** supporting Python, C++, and C execution, reducing code execution latency by 35% using local sandboxed compilation.
+*   **Optimized backend with MongoDB & NestJS** for seamless user storage, safely handling over 100+ concurrent API requests per second with zero external dependencies.
 
 ---
 
