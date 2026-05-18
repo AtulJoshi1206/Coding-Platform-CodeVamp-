@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Editor, { type OnChange } from '@monaco-editor/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Clock, LogIn, Lock } from 'lucide-react';
+import { Play, Send, ChevronLeft, Terminal as TerminalIcon, CheckCircle2, XCircle, Loader2, Trophy, ArrowRight, Clock, LogIn, Lock, ChevronUp, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../config';
 
@@ -33,6 +33,119 @@ const ContestIDE = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [executionTime, setExecutionTime] = useState(0);
     const [contestProblems, setContestProblems] = useState<any[]>([]);
+
+    // Layout drag-and-resize states
+    const [leftWidth, setLeftWidth] = useState(50);
+    const [isDraggingWidth, setIsDraggingWidth] = useState(false);
+    const [terminalHeight, setTerminalHeight] = useState(192);
+    const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false);
+    const [isDraggingHeight, setIsDraggingHeight] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsDesktop(window.innerWidth >= 1024);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const startResizeWidth = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsDraggingWidth(true);
+    };
+
+    const startResizeWidthTouch = (e: React.TouchEvent) => {
+        setIsDraggingWidth(true);
+    };
+
+    const startResizeHeight = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsDraggingHeight(true);
+    };
+
+    const startResizeHeightTouch = (e: React.TouchEvent) => {
+        setIsDraggingHeight(true);
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingWidth) return;
+            const containerWidth = window.innerWidth;
+            if (containerWidth === 0) return;
+            let newWidth = (e.clientX / containerWidth) * 100;
+            if (newWidth < 20) newWidth = 20;
+            if (newWidth > 80) newWidth = 80;
+            setLeftWidth(newWidth);
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!isDraggingWidth || e.touches.length === 0) return;
+            const containerWidth = window.innerWidth;
+            let newWidth = (e.touches[0].clientX / containerWidth) * 100;
+            if (newWidth < 20) newWidth = 20;
+            if (newWidth > 80) newWidth = 80;
+            setLeftWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsDraggingWidth(false);
+        };
+
+        if (isDraggingWidth) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('touchmove', handleTouchMove);
+            window.addEventListener('touchend', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleMouseUp);
+        };
+    }, [isDraggingWidth]);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingHeight) return;
+            const containerHeight = window.innerHeight;
+            let newHeight = containerHeight - e.clientY - 64;
+            if (newHeight < 40) newHeight = 40;
+            if (newHeight > containerHeight * 0.8) newHeight = containerHeight * 0.8;
+            setTerminalHeight(newHeight);
+            setIsTerminalCollapsed(false);
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!isDraggingHeight || e.touches.length === 0) return;
+            const containerHeight = window.innerHeight;
+            let newHeight = containerHeight - e.touches[0].clientY - 64;
+            if (newHeight < 40) newHeight = 40;
+            if (newHeight > containerHeight * 0.8) newHeight = containerHeight * 0.8;
+            setTerminalHeight(newHeight);
+            setIsTerminalCollapsed(false);
+        };
+
+        const handleMouseUp = () => {
+            setIsDraggingHeight(false);
+        };
+
+        if (isDraggingHeight) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('touchmove', handleTouchMove);
+            window.addEventListener('touchend', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleMouseUp);
+        };
+    }, [isDraggingHeight]);
 
     const handleEditorChange: OnChange = (value) => {
         setCode(value || '');
@@ -323,18 +436,21 @@ const ContestIDE = () => {
                 </div>
             </div>
 
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 h-full min-h-0">
+            <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-0 h-full min-h-0 select-none">
                 {/* Left: Description */}
-                <div className="bg-surface border border-border rounded-2xl p-6 overflow-y-auto custom-scrollbar">
+                <div 
+                    style={isDesktop ? { width: `${leftWidth}%` } : undefined}
+                    className="bg-surface border border-border rounded-2xl p-6 overflow-y-auto custom-scrollbar h-full min-h-0"
+                >
                     <h3 className="text-lg font-bold mb-4">Description</h3>
                     <p className="text-gray-300 leading-relaxed font-light whitespace-pre-line">{problem.description}</p>
-
+ 
                     {sampleTestCases.length > 0 && (
                         <div className="mt-8 space-y-4">
                             <h4 className="text-sm font-semibold text-gray-400 mb-2">Examples</h4>
-                            {sampleTestCases.map((tc, i) => (
-                                <div key={i} className="bg-white/5 rounded-xl p-4 border border-border/50">
-                                    <p className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2">Example {i + 1}</p>
+                            {sampleTestCases.map((tc, idx) => (
+                                <div key={idx} className="bg-white/5 rounded-xl p-4 border border-border/50">
+                                    <p className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2">Example {idx + 1}</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-xs text-gray-500 mb-1 font-medium">Input:</p>
@@ -349,7 +465,7 @@ const ContestIDE = () => {
                             ))}
                         </div>
                     )}
-
+ 
                     <div className="mt-8">
                         <h4 className="text-sm font-semibold text-gray-400 mb-2">Constraints</h4>
                         <ul className="list-disc list-inside text-gray-500 text-sm space-y-1">
@@ -357,9 +473,23 @@ const ContestIDE = () => {
                         </ul>
                     </div>
                 </div>
-
+ 
+                {/* Vertical Resizer */}
+                {isDesktop && (
+                    <div
+                        onMouseDown={startResizeWidth}
+                        onTouchStart={startResizeWidthTouch}
+                        className={`hidden lg:flex items-center justify-center w-2 hover:bg-primary/20 transition-all cursor-col-resize select-none h-full relative group ${isDraggingWidth ? 'bg-primary/30' : 'bg-transparent'}`}
+                    >
+                        <div className={`w-[2px] h-16 rounded-full group-hover:bg-primary transition-colors ${isDraggingWidth ? 'bg-primary' : 'bg-[#2E364F]'}`} />
+                    </div>
+                )}
+ 
                 {/* Right: Editor & Terminal */}
-                <div className="flex flex-col gap-4 overflow-hidden">
+                <div 
+                    style={isDesktop ? { width: `${100 - leftWidth}%` } : undefined}
+                    className="flex flex-col gap-0 overflow-hidden h-full min-h-0"
+                >
                     <div className="flex-1 bg-surface border border-border rounded-2xl overflow-hidden flex flex-col">
                         <div className="bg-white/5 px-4 py-2 flex items-center justify-between border-b border-border">
                             <select
@@ -407,68 +537,99 @@ const ContestIDE = () => {
                         </div>
                     </div>
 
+                    {/* Horizontal Resizer */}
+                    <div
+                        onMouseDown={startResizeHeight}
+                        onTouchStart={startResizeHeightTouch}
+                        onDoubleClick={() => setIsTerminalCollapsed(!isTerminalCollapsed)}
+                        className={`flex items-center justify-center h-2 hover:bg-primary/20 transition-all cursor-row-resize select-none w-full relative group ${isDraggingHeight ? 'bg-primary/30' : 'bg-transparent'}`}
+                    >
+                        <div className={`h-[2px] w-16 rounded-full group-hover:bg-primary transition-colors ${isDraggingHeight ? 'bg-primary' : 'bg-[#2E364F]'}`} />
+                    </div>
+
                     {/* Terminal */}
-                    <div className="h-48 bg-background border border-border rounded-2xl p-4 overflow-y-auto flex flex-col">
-                        <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
-                            <TerminalIcon size={14} /> TERMINAL
+                    <div 
+                        style={{ height: isTerminalCollapsed ? '42px' : `${terminalHeight}px` }}
+                        className="bg-background border border-border rounded-2xl overflow-hidden flex flex-col min-h-[42px] transition-all duration-150"
+                    >
+                        {/* Terminal Header */}
+                        <div 
+                            onClick={() => setIsTerminalCollapsed(!isTerminalCollapsed)}
+                            className="bg-white/5 px-4 py-2.5 flex items-center justify-between border-b border-[#2E364F]/50 cursor-pointer select-none hover:bg-white/10 transition-colors"
+                        >
+                            <div className="flex items-center gap-2 text-gray-400 text-xs font-bold font-mono">
+                                <TerminalIcon size={14} /> TERMINAL
+                            </div>
+                            <button className="text-gray-500 hover:text-white transition-colors">
+                                {isTerminalCollapsed ? (
+                                    <ChevronUp size={14} />
+                                ) : (
+                                    <ChevronDown size={14} />
+                                )}
+                            </button>
                         </div>
 
-                        <AnimatePresence mode="wait">
-                            {!output ? (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-700 text-sm font-mono">
-                                    $ Run your code to see the output here...
-                                </motion.p>
-                            ) : (
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                                    {output.error ? (
-                                        <pre className="text-red-400 font-mono text-sm whitespace-pre-wrap">{output.error}</pre>
+                        {/* Terminal Body */}
+                        {!isTerminalCollapsed && (
+                            <div className="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col">
+                                <AnimatePresence mode="wait">
+                                    {!output ? (
+                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-700 text-sm font-mono">
+                                            $ Run your code to see the output here...
+                                        </motion.p>
                                     ) : (
-                                        <>
-                                            <div className="flex items-center gap-4 text-xs font-mono">
-                                                {(() => {
-                                                    const results = output.results || [];
-                                                    const allPassed = results.length > 0 && results.every((r: any) => r.passed);
-                                                    const totalTime = results.reduce((acc: number, r: any) => acc + (r.time || 0), 0);
-                                                    return (
-                                                        <>
-                                                            <span className={`flex items-center gap-1 ${allPassed ? 'text-accent' : 'text-red-400'}`}>
-                                                                {allPassed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                                                                {allPassed ? 'Accepted' : 'Failed'}
-                                                            </span>
-                                                            <span className="text-gray-500">Total Runtime: {totalTime}ms</span>
-                                                        </>
-                                                    );
-                                                })()}
-                                            </div>
-                                            <div className="space-y-3 mt-4">
-                                                {output.results?.map((res: any, i: number) => (
-                                                    <div key={i} className={`bg-white/5 p-3 rounded-xl border ${res.passed ? 'border-border/30' : 'border-red-500/30'} font-mono text-xs`}>
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Test {i + 1}</span>
-                                                            <span className={res.passed ? 'text-accent' : 'text-red-400'}>
-                                                                {res.passed ? 'Passed' : 'Failed'}
-                                                            </span>
-                                                        </div>
-                                                        {!res.passed && (
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                <div>
-                                                                    <p className="text-gray-500 text-[10px] uppercase">Your Output</p>
-                                                                    <pre className="text-red-400 mt-1">{res.actualOutput || 'Empty'}</pre>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-gray-500 text-[10px] uppercase">Expected</p>
-                                                                    <pre className="text-accent mt-1">{res.expectedOutput}</pre>
-                                                                </div>
-                                                            </div>
-                                                        )}
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                                            {output.error ? (
+                                                <pre className="text-red-400 font-mono text-sm whitespace-pre-wrap">{output.error}</pre>
+                                            ) : (
+                                                <>
+                                                    <div className="flex items-center gap-4 text-xs font-mono">
+                                                        {(() => {
+                                                            const results = output.results || [];
+                                                            const allPassed = results.length > 0 && results.every((r: any) => r.passed);
+                                                            const totalTime = results.reduce((acc: number, r: any) => acc + (r.time || 0), 0);
+                                                            return (
+                                                                <>
+                                                                    <span className={`flex items-center gap-1 ${allPassed ? 'text-accent' : 'text-red-400'}`}>
+                                                                        {allPassed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                                                                        {allPassed ? 'Accepted' : 'Failed'}
+                                                                    </span>
+                                                                    <span className="text-gray-500">Total Runtime: {totalTime}ms</span>
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </>
+                                                    <div className="space-y-3 mt-4">
+                                                        {output.results?.map((res: any, i: number) => (
+                                                            <div key={i} className={`bg-white/5 p-3 rounded-xl border ${res.passed ? 'border-border/30' : 'border-red-500/30'} font-mono text-xs`}>
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Test {i + 1}</span>
+                                                                    <span className={res.passed ? 'text-accent' : 'text-red-400'}>
+                                                                        {res.passed ? 'Passed' : 'Failed'}
+                                                                    </span>
+                                                                </div>
+                                                                {!res.passed && (
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <div>
+                                                                            <p className="text-gray-500 text-[10px] uppercase font-bold">Your Output</p>
+                                                                            <pre className="text-red-400 mt-1 font-mono whitespace-pre-wrap">{res.actualOutput || 'Empty'}</pre>
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-gray-500 text-[10px] uppercase font-bold">Expected</p>
+                                                                            <pre className="text-accent mt-1 font-mono whitespace-pre-wrap">{res.expectedOutput}</pre>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </motion.div>
                                     )}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                </AnimatePresence>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
